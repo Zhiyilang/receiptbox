@@ -1,0 +1,8 @@
+Acme Office Supplies Co., Ltd.
+Invoice No: INV-2026-0901
+Invoice Date: 2026-09-15
+Subtotal: 13400.00
+Tax Rate: 13%
+VAT: 1742.00
+Total: 15142.00
+Status: unpaid
