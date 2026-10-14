@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  core:
+    # 核心引擎零依赖（纯标准库）——在任何 Python 上都能跑
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run assertion suite (32 checks incl. real MCP stdio round-trip)
+        run: python eval.py
+
+  gradio-app:
+    # Gradio/MCP 应用层（需要 gradio[mcp]）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: App imports and builds its Blocks UI
+        run: python -c "import app; print('gradio app OK')"
