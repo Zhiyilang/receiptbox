@@ -1,0 +1,16 @@
+vendor: Acme Office Supplies Co., Ltd.
+invoice_no: INV-2026-0901
+date: 2026-09-15
+subtotal: 13400.00
+tax_rate: 13%
+tax: 1742.00
+total: 15142.00
+status: unpaid
+---
+vendor: Acme Office Supplies Co., Ltd.
+invoice_no: INV-2026-0901
+date: 2026-09-15
+subtotal: 13400.00
+tax: 1742.00
+total: 15142.00
+status: unpaid
