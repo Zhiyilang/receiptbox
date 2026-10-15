@@ -261,6 +261,75 @@ resp = client._post({"jsonrpc": "2.0", "method": "notifications/cancelled",
                      "params": {}})
 check("http.notification-202", resp is None, str(resp))
 
+# ---- 裸 HTTP 一致性：这两条是自查真抓出来的 spec 偏差，必须锁住 ----
+import urllib.error
+import urllib.request
+
+_opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+_urllib = urllib.request.install_opener(_opener)
+URL = "http://127.0.0.1:%d/mcp" % http_port
+SSE_ACC = "application/json, text/event-stream"
+JSON_ACC = "application/json"
+
+
+def _raw(body, accept=SSE_ACC, method="POST", sid=None):
+    h = {"Content-Type": "application/json", "Accept": accept}
+    if sid:
+        h["Mcp-Session-Id"] = sid
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(URL, data=data, method=method, headers=h)
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status, dict(r.getheaders()).get("Content-Type", ""), \
+                r.read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as e:
+        return e.code, (e.headers.get("Content-Type") if e.headers else ""), \
+            e.read().decode("utf-8", "replace")
+
+
+# 1) 会话缺失/无效 → 400（spec 2025-11-25），不是 404
+st, _ct, bd = _raw({"jsonrpc": "2.0", "id": 9, "method": "tools/list",
+                    "params": {}})
+check("http.no-session-400", st == 400, f"status={st} body={bd[:80]}")
+check("http.no-session-jsonrpc-error",
+      '"error"' in bd and "-32000" in bd, bd[:100])
+
+# 2) 内容协商：只 Accept application/json → 单条 JSON，不喂 SSE 帧
+st, ct, bd = _raw({"jsonrpc": "2.0", "id": 10, "method": "tools/list",
+                   "params": {}}, accept=JSON_ACC, sid=client.session_id)
+check("http.json-accept-status", st == 200, f"status={st}")
+check("http.json-accept-content-type", "application/json" in ct, ct)
+check("http.json-accept-parses", bd.lstrip().startswith("{"), bd[:60])
+check("http.json-accept-no-sse-frame", not bd.startswith("event:"), bd[:60])
+
+# 3) Accept 含 text/event-stream → 仍然是 SSE 帧
+st, ct, bd = _raw({"jsonrpc": "2.0", "id": 11, "method": "tools/list",
+                   "params": {}}, accept=SSE_ACC, sid=client.session_id)
+check("http.sse-accept-content-type", "text/event-stream" in ct, ct)
+check("http.sse-accept-frame", bd.startswith("event: message"), bd[:40])
+
+# 4) DELETE 终止会话后复用 → 400（而不是悄悄接受）
+st, _ct, bd = _raw(None, method="DELETE", sid=client.session_id)
+check("http.delete-terminates", st == 200 and '"terminated"' in bd, f"{st} {bd[:60]}")
+st, _ct, bd = _raw({"jsonrpc": "2.0", "id": 12, "method": "tools/list",
+                    "params": {}}, sid=client.session_id)
+check("http.after-delete-400", st == 400, f"status={st}")
+
+# 5) GET 服务端→客户端流未提供 → 405（spec 允许）
+st, _ct, bd = _raw(None, method="GET", sid=client.session_id)
+check("http.get-405", st == 405, f"status={st} body={bd[:60]}")
+
+# 6) 畸形 JSON → 400 + parse error
+req = urllib.request.Request(URL, data=b"{nope", method="POST",
+                             headers={"Content-Type": "application/json",
+                                      "Accept": SSE_ACC})
+try:
+    with urllib.request.urlopen(req, timeout=10) as r:
+        st, bd = r.status, r.read().decode()
+except urllib.error.HTTPError as e:
+    st, bd = e.code, e.read().decode("utf-8", "replace")
+check("http.malformed-400", st == 400 and "-32700" in bd, f"{st} {bd[:80]}")
+
 http_srv.shutdown()
 
 print("== F. AWS Bedrock brain (stdlib SigV4, zero-dependency) ==")
