@@ -227,35 +227,59 @@ def handle_message(msg: dict) -> Optional[dict]:
     return _err(METHOD_NOT_FOUND, f"method not found: {method!r}", req_id)
 
 
+def _force_utf8(stream) -> None:
+    """把真实 std 流锁定为 UTF-8。
+
+    Windows 的管道默认用本地代码页（如 cp936）：写含非 GBK 字符的响应会
+    UnicodeEncodeError 直接打死子进程，读侧同理。MCP over stdio 与平台
+    locale 无关，这里显式锁定 UTF-8，父子进程都用 UTF-8 即可完全确定。
+    """
+    reconfigure = getattr(stream, "reconfigure", None)
+    if reconfigure is None:
+        return
+    try:
+        reconfigure(encoding="utf-8")
+    except (ValueError, OSError):
+        pass
+
+
 def serve(stdin=None, stdout=None) -> None:
     """stdio 传输：一行一条 JSON（MCP 标准传输方式）。"""
     stdin = stdin or sys.stdin
     stdout = stdout or sys.stdout
+    if stdin is sys.stdin:
+        _force_utf8(stdin)
+    if stdout is sys.stdout:
+        _force_utf8(stdout)
     trace = os.environ.get("RECEIPTBOX_TRACE")
     if trace:
         with open(trace, "a", encoding="utf-8") as tf:
             tf.write("serve-start pid=%d\n" % os.getpid())
-    for line in stdin:
-        line = line.strip()
-        if trace:
-            with open(trace, "a", encoding="utf-8") as tf:
-                tf.write("line: %r\n" % line[:80])
-        if not line:
-            continue
-        try:
-            msg = json.loads(line)
-        except json.JSONDecodeError as e:
-            resp = _err(PARSE_ERROR, f"parse error: {e}")
-            stdout.write(json.dumps(resp, ensure_ascii=False) + "\n")
-            stdout.flush()
-            continue
-        resp = handle_message(msg)
-        if resp is not None:
-            stdout.write(json.dumps(resp, ensure_ascii=False) + "\n")
-            stdout.flush()
+    try:
+        for line in stdin:
+            line = line.strip()
             if trace:
                 with open(trace, "a", encoding="utf-8") as tf:
-                    tf.write("responded id=%s\n" % resp.get("id"))
+                    tf.write("line: %r\n" % line[:80])
+            if not line:
+                continue
+            try:
+                msg = json.loads(line)
+            except json.JSONDecodeError as e:
+                resp = _err(PARSE_ERROR, f"parse error: {e}")
+                stdout.write(json.dumps(resp, ensure_ascii=False) + "\n")
+                stdout.flush()
+                continue
+            resp = handle_message(msg)
+            if resp is not None:
+                stdout.write(json.dumps(resp, ensure_ascii=False) + "\n")
+                stdout.flush()
+                if trace:
+                    with open(trace, "a", encoding="utf-8") as tf:
+                        tf.write("responded id=%s\n" % resp.get("id"))
+    except BrokenPipeError:
+        # 宿主提前关闭 stdout：安静退岀，不把堆栈抛给管道
+        pass
     if trace:
         with open(trace, "a", encoding="utf-8") as tf:
             tf.write("loop-exit (stdin EOF)\n")
