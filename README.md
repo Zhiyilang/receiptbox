@@ -161,7 +161,7 @@ print(audit_document(open("invoice.txt").read()))
 python eval.py
 ```
 
-56 assertions, all offline, covering: extractor field/guards/edges, the 7
+68 assertions, all offline, covering: extractor field/guards/edges, the 7
 risk rules + scoring, in-process JSON-RPC (initialize / tools/list /
 tools/call / notifications / error paths), **a real subprocess stdio
 session** (`initialize → notifications/initialized → tools/list → tools/call ×2
@@ -188,7 +188,7 @@ receiptbox/
   mcp_client.py   zero-dependency Streamable HTTP client (stdlib)
 app.py            Gradio app: 4 tool tabs + JSON-RPC passthrough, mcp_server=True
 alexa_sim.py      simulated Alexa+ experience: live MCP calls + spoken reply
-eval.py           56 offline assertions
+eval.py           68 offline assertions
 examples/         sample invoices (messy + structured) + SDK client demo
 AMAZON_SUBMISSION.md   Devpost text for the Amazon hackathon
 FEEDBACK.md           product feedback (Alexa+/MCP, Bedrock, GitHub)
