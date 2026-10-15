@@ -52,11 +52,27 @@ https://github.com/Zhiyilang/receiptbox （公开 · MIT）
 ## Track & mini challenges 勾选
 - [x] Alexa+（主赛道）
 - [x] AWS Builder Mini Challenge（Bedrock 集成，见 FEEDBACK.md §2）
-- [x] Open Source Mini Challenge（赛窗内新建公开 MIT 仓库 + 56 条断言）
+- [x] Open Source Mini Challenge（赛窗内新建公开 MIT 仓库 + 68 条断言）
+
+## Friction log（**最高 +10% 评分加成，务必填**）
+赛会原文：*"Submissions with friction logs can earn up to a 10% judging bonus."*
+**把 `FRICTION_LOG.md` 的内容填进 Devpost 的 Friction log 字段。**
+8 条全部是我实测复现的，其中两条是我自查抓出并已修的自身 spec 偏差
+（session 缺失返回 404 而非 400；只 Accept JSON 的客户端被喂了 SSE 帧）。
+诚实写出"这是我自己的 bug"比只写外部环境抱怨更有说服力。
+
+## Feature requests（选填，可再拿印象分）
+1. **官方 Alexa+ 模拟器**（关键）：让非 Preview 地区开发者能测真实交互契约 ——
+   Alexa+ 目前设备/地区受限，这是全球赛最大的参与门槛，我在 FRICTION_LOG.md §5 写了。
+2. MCP 会话错误的状态码对照表（400 / 400 / 400 vs JSON-RPC error）。
+3. MCP 内容协商纳入一致性测试（`Accept: application/json` 必须回裸 JSON）。
+4. 无 SDK 的最小 SigV4 示例 + 已知答案测试向量。
 
 ## 提交前自检
 - [ ] GitHub 仓库公开 + MIT LICENSE 在库内
 - [ ] 代码里真实调用赛道技术（http_mcp.py 即 MCP server 本体，非 README 提及）
 - [ ] <3min 英文 demo 视频传 YouTube 并公开
 - [ ] FEEDBACK.md 内容粘贴进 Product feedback 字段
+- [ ] **FRICTION_LOG.md 内容粘贴进 Friction log 字段（+10%）**
+- [ ] Feature requests 字段填上面 4 条
 - [ ] 说明项目创建于赛窗内（2026-10-14/15，赛窗 8-31 起）
