@@ -169,7 +169,7 @@ def _stdio_session(messages, timeout=40):
     proc = subprocess.Popen(
         [sys.executable, "-m", "receiptbox.mcp_server"],
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        text=True, cwd=".",
+        text=True, encoding="utf-8", errors="replace", cwd=".",
     )
     payload = "".join(json.dumps(m, ensure_ascii=False) + "\n" for m in messages)
     out, err = proc.communicate(payload, timeout=timeout)
@@ -204,14 +204,17 @@ check("stdio.initialize", r1.get("result", {}).get("protocolVersion") == PROTOCO
 r2 = by_id.get(2, {})
 check("stdio.tools-list", len(r2.get("result", {}).get("tools", [])) == 4)
 r3 = by_id.get(3, {})
-payload = json.loads(r3["result"]["content"][0]["text"])
-check("stdio.audit", payload["report"]["score"] >= 30
-      and any(f["code"] == "DUPLICATE" for f in payload["report"]["findings"]),
+_c3 = r3.get("result", {}).get("content", [{}])
+payload = json.loads(_c3[0].get("text", "{}")) if _c3 else {}
+check("stdio.audit", payload.get("report", {}).get("score", 0) >= 30
+      and any(f.get("code") == "DUPLICATE"
+              for f in payload.get("report", {}).get("findings", [])),
       json.dumps(payload)[:120])
 r4 = by_id.get(4, {})
-payload = json.loads(r4["result"]["content"][0]["text"])
-check("stdio.payment_link", payload["payment_link"].startswith("https://")
-      and payload["amount"] == 99.50, payload.get("payment_link", ""))
+_c4 = r4.get("result", {}).get("content", [{}])
+payload = json.loads(_c4[0].get("text", "{}")) if _c4 else {}
+check("stdio.payment_link", str(payload.get("payment_link", "")).startswith("https://")
+      and payload.get("amount") == 99.50, str(payload.get("payment_link", "")))
 
 print("== E. MCP over Streamable HTTP (spec 2025-11-25, real server) ==")
 # Amazon Alexa+ 赛道硬要求：self-hosted MCP server，spec 2025-11-25+，
