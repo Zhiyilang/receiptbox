@@ -39,8 +39,8 @@ Streamable HTTP——在付款前把票审一遍。」
 ### 1:25–1:50 · AWS Builder 迷你挑战（Bedrock 三档大脑）
 1. 展示 `receiptbox/aws_brain.py` 的 `signature_key` 函数：
    「为了零依赖，SigV4 是我们手写的——hmac + sha256，四步派生。」
-2. `python eval.py` 尾部：`RESULT: 56 passed, 0 failed` 高亮 3 秒。
-   「56 条断言：stdio 真实子进程往返、HTTP 真服务+真客户端端到端、
+2. `python eval.py` 尾部：`RESULT: 68 passed, 0 failed` 高亮 3 秒。
+   「68 条断言：stdio 真实子进程往返、HTTP 真服务+真客户端端到端、
    版本协商、SigV4 确定性、模拟器离线降级——全部可复现。」
 
 ### 1:50–2:10 · 设计亮点（语速放慢，评委记分点）
