@@ -1,7 +1,7 @@
 # Amazon Developer Hackathon · Devpost 申报文案（可粘贴）
 
 **赛事**：Build, Ship, Shape: Amazon Developer Hackathon
-**截止**：Oct 24, 2026 02:00 GMT+7（北京 10-24 01:00）
+**截止**：Oct 24, 2026 03:00 GMT+8（北京 10-24 **03:00**；官方 Devpost 页 "Oct 24, 2026 @ 3:00am GMT+8"，Internshala 记 12:00 PT = 同一时刻。此前本文件误写 01:00，已按官方订正）
 **主赛道**：Alexa+ ｜ **迷你挑战**：AWS Builder + Open Source
 
 ---
@@ -38,7 +38,7 @@ utterance ──► PERCEIVE(意图路由) ──► PLAN(选工具+填参数)
 提取大脑三档降级：AWS Bedrock（Converse API，手写 SigV4，stdlib）→ OpenAI 兼容端点 → 离线正则引擎。任何机器 `python` 直接跑，无需 pip install 任何东西。
 
 ### 自证（评委可复现）
-`python eval.py` → **56/56 断言全过**，覆盖：stdio 传输真实子进程往返、Streamable HTTP 真服务+真客户端端到端（含版本协商/会话/错误路径/通知 202）、SigV4 签名确定性、Alexa 模拟器闭环与离线降级。
+`python eval.py` → **68/68 断言全过**，覆盖：stdio 传输真实子进程往返、Streamable HTTP 真服务+真客户端端到端（含版本协商/会话/错误路径/通知 202）、SigV4 签名确定性、Alexa 模拟器闭环与离线降级。
 
 ## Built With（标签）
 `python` `mcp` `model-context-protocol` `alexa` `amazon-bedrock` `aws` `sigv4` `ai-agents` `stdlib` `json-rpc` `sse` `paypal`
