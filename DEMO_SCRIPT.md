@@ -53,7 +53,7 @@ Streamable HTTP——在付款前把票审一遍。」
 
 ### 2:10–2:30 · 收尾
 「付款前，先问一句 Alexa。ReceiptBox——self-hosted MCP server，
-MIT 开源，`python eval.py` 56/56 自证。GitHub: Zhiyilang/receiptbox。谢谢！」
+MIT 开源，`python eval.py` 68/68 自证。GitHub: Zhiyilang/receiptbox。谢谢！」
 
 ---
 
@@ -61,7 +61,7 @@ MIT 开源，`python eval.py` 56/56 自证。GitHub: Zhiyilang/receiptbox。谢�
 
 > 若投 HF：改用 `python app.py`（:7860，Gradio Blocks + `/gradio_api/mcp/`），
 > 分镜在 A 的基础上把「MCP server 本体」一段换成「协议透传标签页」演示
-> （浏览器内直接发 JSON-RPC），并把 eval 32/32 的说法改成当前总数。
+> （浏览器内直接发 JSON-RPC），并把 eval 的说法对齐到当前总数（68/68）。
 
 ---
 
